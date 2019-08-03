@@ -31,7 +31,8 @@ Module Sphere_Linear_Terms
     Use TransportCoefficients
     Use Math_Constants
     Implicit None
-    Real*8, Allocatable :: Lconservation_weights(:)
+    Real*8, Allocatable :: Lconservation_weights(:), Solidbody_weights(:)
+    Real*8 :: Solidbody_norm
 
 Contains
     Subroutine Linear_Init()
@@ -44,7 +45,6 @@ Contains
             Call Initialize_Linear_System()
 
             If (strict_L_conservation .or. gentle_L_conservation) Then
-
                 Allocate(Lconservation_weights(1:N_R))
                 Lconservation_weights(1:N_R) = 0.0d0
                 nm = 0
@@ -58,6 +58,22 @@ Contains
                     Lconservation_weights( nm+(2*gridcp%npoly(m))/3+1:nm+gridcp%npoly(m) ) = 0.0d0  ! De-Alias
                     nm = nm + gridcp%npoly(m)
                 Enddo
+            Endif
+            If (gentle_L_conservation) Then
+                Allocate(Solidbody_weights(1:N_R))
+                Solidbody_weights(1:N_R) = 0.0d0
+                nm = 0
+                Do m = 1, gridcp%domain_count
+                    Do n = 1, gridcp%npoly(m)
+                        Do r = 1, gridcp%npoly(m)
+                            T = gridcp%dcheby(m)%data(r,n,0)
+                            Solidbody_weights(n+nm) = Solidbody_weights(n+nm) + ref%density(r+nm) * R_squared(r+nm) * T
+                        Enddo
+                    Enddo
+                    Solidbody_weights( nm+(2*gridcp%npoly(m))/3+1:nm+gridcp%npoly(m) ) = 0.0d0  ! De-Alias
+                    nm = nm + gridcp%npoly(m)
+                Enddo
+                Solidbody_norm = SUM(Solidbody_weights*Lconservation_weights)
             Endif
         Endif
     End Subroutine Linear_Init
