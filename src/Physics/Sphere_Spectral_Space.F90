@@ -88,7 +88,7 @@ Contains
                 if (l .eq. 1) then ! Select only modes with l = 1
                     integral = SUM(wsp%p1a(:,1,lp,zvar)*Lconservation_weights)/Solidbody_norm
                     Do n = 1, N_r
-                        wsp%p1a(n,1,lp,zvar) = wsp%p1a(n,1,lp,zvar)-integral*Solidbody_weights
+                        wsp%p1a(n,1,lp,zvar) = wsp%p1a(n,1,lp,zvar)-integral*Solidbody_weights(n)
                     enddo
                 endif
             enddo
