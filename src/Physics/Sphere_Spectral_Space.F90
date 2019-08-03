@@ -38,7 +38,7 @@ Contains
 
     Subroutine Post_Solve()
         Implicit None
-        Integer :: m, i, lp, l, n, nn
+        Integer :: m, i, lp, l, n
         Character*12 :: tstring, otstring
         Real*8 :: integral
 
@@ -86,11 +86,9 @@ Contains
             Do lp = 1, my_num_lm
                 l = my_lm_lval(lp)
                 if (l .eq. 1) then ! Select only modes with l = 1
-                    integral = SUM(wsp%p1a(:,1,lp,zvar)*Lconservation_weights)/N_R
-                    nn = 1
-                    Do n = 1, gridcp%domain_count
-                        wsp%p1a(nn,1,lp,zvar) = wsp%p1a(nn,1,lp,zvar)-integral*gridcp%npoly(n)/Lconservation_weights(nn)
-                        nn = nn + gridcp%npoly(n)
+                    integral = SUM(wsp%p1a(:,1,lp,zvar)*Lconservation_weights)/Solidbody_norm
+                    Do n = 1, N_r
+                        wsp%p1a(n,1,lp,zvar) = wsp%p1a(n,1,lp,zvar)-integral*Solidbody_weights
                     enddo
                 endif
             enddo
